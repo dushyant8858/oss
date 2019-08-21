@@ -1,0 +1,31 @@
+- hosts: webservers
+  become: yes
+
+  handlers:
+    - name: restart Apache
+      service: name=httpd state=restarted
+
+  tasks:
+    - name: Install git client
+      yum: name=git state=present
+
+    - name: Download and deploy Open Source Project
+      git: 
+        repo: http://github.com/dushyant8858/open_source_summit
+        dest: /var/www/html/
+        clone: yes  
+
+    - name: Install the Apache web server
+      yum: name=httpd state=present
+
+    - name: Ensure that Apache is started and enabled on system boot
+      service: name=httpd state=started enabled=yes
+
+    - name: Change the files ownership to be owned by vagrant
+      file:
+        path: /var/www/html
+        owner: vagrant
+        group: vagrant
+        recurse: yes 
+      notify:
+        - restart Apache
